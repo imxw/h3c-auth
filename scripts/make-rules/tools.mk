@@ -17,11 +17,11 @@ tools.install.%:
 
 .PHONY: tools.verify.%
 tools.verify.%:
-	@if ! which $* &>/dev/null; then $(MAKE) tools.install.$*; fi
+	@if ! command -v $* >/dev/null 2>&1; then $(MAKE) install.$*; fi
 
 .PHONY: install.golangci-lint
 install.golangci-lint:
-	@$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+	@$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	@golangci-lint completion bash > $(HOME)/.golangci-lint.bash
 	@if ! grep -q .golangci-lint.bash $(HOME)/.bashrc; then echo "source \$$HOME/.golangci-lint.bash" >> $(HOME)/.bashrc; fi
 

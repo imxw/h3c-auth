@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/imxw/h3c-auth/internal/pkg/h3cauth"
 	"github.com/imxw/h3c-auth/internal/pkg/netutil"
-	"github.com/spf13/cobra"
 )
 
 var authCmd = &cobra.Command{

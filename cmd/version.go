@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/imxw/h3c-auth/internal/pkg/version"
 	"github.com/spf13/cobra"
+
+	"github.com/imxw/h3c-auth/internal/pkg/version"
 )
 
 var versionCmd = &cobra.Command{

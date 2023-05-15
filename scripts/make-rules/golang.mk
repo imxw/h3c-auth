@@ -48,8 +48,8 @@ go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BIN
 
 .PHONY: go.format
 go.format: tools.verify.goimports ## 格式化 Go 源码.
-	@$(FIND) -type f -name '*.go' | $(XARGS) gofmt -s -w
-	@$(FIND) -type f -name '*.go' | $(XARGS) goimports -w -local $(ROOT_PACKAGE)
+	@$(FIND) -type f -name '*.go' | xargs gofmt -s -w
+	@$(FIND) -type f -name '*.go' | xargs goimports -w -local $(ROOT_PACKAGE)
 	@$(GO) mod edit -fmt
 
 .PHONY: go.tidy
@@ -59,4 +59,4 @@ go.tidy: ## 自动添加/移除依赖包.
 .PHONY: go.lint
 go.lint: tools.verify.golangci-lint ## 执行静态代码检查.
 	@echo "===========> Run golangci to lint source codes"
-	@golangci-lint run -c $(ROOT_DIR)/.golangci.yaml $(ROOT_DIR)/...
+	@golangci-lint run -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/...

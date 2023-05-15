@@ -69,4 +69,3 @@ endif
 
 # Linux 命令设置
 FIND := find . ! -path './third_party/*' ! -path './vendor/*'
-XARGS := xargs --no-run-if-empty

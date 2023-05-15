@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/imxw/h3c-auth/internal/pkg/netutil"
 	"github.com/spf13/cobra"
+
+	"github.com/imxw/h3c-auth/internal/pkg/netutil"
 )
 
 var checkCmd = &cobra.Command{
