@@ -21,12 +21,6 @@ include scripts/make-rules/generate.mk
 define USAGE_OPTIONS
 
 Options:
-  BINS             The binaries to build. Default is all of cmd.
-                   This option is available when using: make build
-                   Example: make build BINS="miniblog test"
-  IMAGES           Backend images to make. Default is all of cmd.
-                   This option is available when using: make image/push
-                   Example: make image IMAGES="miniblog"
   VERSION          The version information compiled into binaries.
                    The default is obtained from gsemver or git.
   V                Set to 1 enable verbose build. Default is 0.

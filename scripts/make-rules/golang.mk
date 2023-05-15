@@ -19,7 +19,7 @@ ifeq ($(origin GOBIN), undefined)
 	GOBIN := $(GOPATH)/bin
 endif
 
-COMMANDS ?= $(filter-out %.md, $(wildcard $(ROOT_DIR)/cmd/*))
+COMMANDS ?= "h3cauth"
 BINS ?= $(foreach cmd,${COMMANDS},$(notdir $(cmd)))
 
 ifeq ($(COMMANDS),)
@@ -29,6 +29,7 @@ ifeq ($(BINS),)
   $(error Could not determine BINS, set ROOT_DIR or run in source dir)
 endif
 
+
 .PHONY: go.build.verify ## 检查 go 命令行工具是否安装.
 go.build.verify:
 	@if ! which go &>/dev/null; then echo "Cannot found go compile tool. Please install go tool first."; exit 1; fi
@@ -36,12 +37,11 @@ go.build.verify:
 .PHONY: go.build.%
 go.build.%: ## 编译 Go 源码.
 	$(eval COMMAND := $(word 2,$(subst ., ,$*)))
-	$(eval PLATFORM := $(word 1,$(subst ., ,$*)))
 	$(eval OS := $(word 1,$(subst _, ,$(PLATFORM))))
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS) $(ARCH)"
 	@mkdir -p $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)
-	@CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_PACKAGE)/cmd/$(COMMAND)
+	@CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/main.go
 
 .PHONY: go.build
 go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS))) # 根据指定的平台编译源码.

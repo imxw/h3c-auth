@@ -5,6 +5,7 @@ go 1.20
 require (
 	git.sr.ht/~jackmordaunt/go-toast v1.0.0
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb
+	github.com/spf13/viper v1.15.0
 )
 
 require (
@@ -16,7 +17,6 @@ require (
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.15.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
