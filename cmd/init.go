@@ -61,8 +61,13 @@ func createCfgInCwd(cmd *cobra.Command, file string) error {
 
 func genCfg(cmd *cobra.Command, template string) []byte {
 
-	name := cmd.PersistentFlags().Lookup("username").Value
-	pwd := cmd.PersistentFlags().Lookup("password").Value
+	var err error
+	var name, pwd string
+
+	name, err = cmd.PersistentFlags().GetString("username")
+	cobra.CheckErr(err)
+	pwd, err = cmd.PersistentFlags().GetString("password")
+	cobra.CheckErr(err)
 
 	return []byte(fmt.Sprintf(defaultCfg, name, pwd))
 }
@@ -72,5 +77,5 @@ func init() {
 	pwdV := "password"
 	initCmd.PersistentFlags().StringP(userV, "u", "USERNAME", "Your H3C account")
 	initCmd.PersistentFlags().StringP(pwdV, "p", "PASSWORD", "Your H3C password")
-	initCmd.PersistentFlags().BoolP("force", "f", false, "Force to create config file, will override your previous config")
+	initCmd.PersistentFlags().BoolP("force", "f", false, "Force to create config file, will override your previous config (default false)")
 }

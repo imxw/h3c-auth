@@ -14,6 +14,8 @@ var (
 		Use:   "h3cauth",
 		Short: "A cmd for h3c auth",
 		Long:  `h3cauth is a command-line tool for h3c auth.`,
+		Example: `  First, initialize a config using "h3cauth init -u USERNAME -p PASSWORD".
+  Then connect to your network using "h3cauth auth"`,
 	}
 )
 
@@ -27,12 +29,12 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./.auth.yml)")
-
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(initCmd)
+
+	authCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./.auth.yml)")
 }
 
 func initConfig() {
