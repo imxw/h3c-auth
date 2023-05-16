@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/imxw/h3c-auth/internal/pkg/h3cauth"
 	"github.com/imxw/h3c-auth/internal/pkg/netutil"
 	"github.com/imxw/h3c-auth/internal/pkg/notify"
@@ -44,17 +46,21 @@ var authCmd = &cobra.Command{
 				notifyMsg("网络正常，无需认证")
 				return nil
 			}
-			notifyMsg("Start to auth...")
 			cfg := h3cauth.Config{
 				Username: viper.GetString("username"),
 				Password: viper.GetString("password"),
 				IpAddr:   viper.GetString("ipAddr"),
-				Port:     viper.GetInt("port"),
+				Port:     viper.GetString("port"),
 			}
+			validate := validator.New()
+			if err := validate.Struct(cfg); err != nil {
+				return err
+			}
+
+			notifyMsg("Start to auth...")
 			err := h3cauth.Auth(cfg)
 			if err != nil {
-				fmt.Println(err)
-				return nil
+				return err
 			}
 			notifyMsg("Success")
 		}

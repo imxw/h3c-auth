@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	Username string
-	Password string
-	IpAddr   string
-	Port     int
+	Username string `yaml:"username,omitempty" validate:"required"`
+	Password string `yaml:"password,omitempty" validate:"required"`
+	IpAddr   string `yaml:"ipAddr,omitempty" validate:"required,ip"`
+	Port     string `yaml:"port,omitempty" validate:"required,hostname_port"`
 }
 
 func Auth(cfg Config) error {
@@ -23,7 +23,7 @@ func Auth(cfg Config) error {
 	password := cfg.Password
 	serverIP := cfg.IpAddr
 	serverPort := cfg.Port
-	baseUrl := fmt.Sprintf("http://%s:%d", serverIP, serverPort)
+	baseUrl := fmt.Sprintf("http://%s%s", serverIP, serverPort)
 	appRootUrl := baseUrl + "/portal"
 	authUrl := appRootUrl + "/pws?t=li&ifEmailAuth=false"
 
