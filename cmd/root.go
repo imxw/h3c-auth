@@ -14,8 +14,6 @@ var (
 		Use:   "h3cauth",
 		Short: "A cmd for h3c auth",
 		Long:  `h3cauth is a command-line tool for h3c auth.`,
-		Run: func(cmd *cobra.Command, args []string) {
-		},
 	}
 )
 
@@ -34,6 +32,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(initCmd)
 }
 
 func initConfig() {

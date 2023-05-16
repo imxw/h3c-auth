@@ -74,14 +74,17 @@ func init() {
 	pwdV := "password"
 	authCmd.PersistentFlags().StringP(userV, "u", "", "Your H3C account")
 	authCmd.PersistentFlags().StringP(pwdV, "p", "", "Your H3C password")
-	viper.BindPFlag(userV, authCmd.PersistentFlags().Lookup(userV))
-	viper.BindPFlag(pwdV, authCmd.PersistentFlags().Lookup(pwdV))
+	err := viper.BindPFlag(userV, authCmd.PersistentFlags().Lookup(userV))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(pwdV, authCmd.PersistentFlags().Lookup(pwdV))
+	cobra.CheckErr(err)
 }
 
 func notifyMsg(msg string) {
 	if viper.GetBool("isNotify") {
 		note := notify.NewNotification(msg)
-		note.Push()
+		err := note.Push()
+		cobra.CheckErr(err)
 	}
 	fmt.Println(msg)
 }
