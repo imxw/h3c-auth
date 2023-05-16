@@ -55,7 +55,4 @@ func initConfig() {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("auth")
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
 }
