@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/imxw/h3c-auth/internal/pkg/h3cauth"
 	"github.com/imxw/h3c-auth/internal/pkg/netutil"
+	"github.com/imxw/h3c-auth/internal/pkg/notify"
 )
 
 var authCmd = &cobra.Command{
@@ -21,33 +23,59 @@ var authCmd = &cobra.Command{
 
 		isIn := false
 
-		nets := []string{"10.0.156.0/22", "10.0.44.0/22"}
+		if viper.IsSet("netSegment") {
 
-		for _, v := range nets {
-			if !netutil.IsIpInNet(localIp, v) {
-				continue
+			nets := viper.GetStringSlice("netSegment")
+			for _, v := range nets {
+				if !netutil.IsIpInNet(localIp, v) {
+					continue
+				}
+				isIn = true
+				break
 			}
-			isIn = true
-			break
 		}
 
 		if !isIn {
-			fmt.Println("你没有连公司的网络，无需认证")
+			notifyMsg("你没有连公司的网络，无需认证")
 			return nil
 		} else {
 
 			if netutil.IsNetOk() {
-				fmt.Println("网络正常，无需认证")
+				notifyMsg("网络正常，无需认证")
 				return nil
 			}
-			fmt.Println("Start to auth ...")
-			err := h3cauth.Auth()
+			notifyMsg("Start to auth...")
+			cfg := h3cauth.Config{
+				Username: viper.GetString("username"),
+				Password: viper.GetString("password"),
+				IpAddr:   viper.GetString("ipAddr"),
+				Port:     viper.GetInt("port"),
+			}
+			err := h3cauth.Auth(cfg)
 			if err != nil {
 				fmt.Println(err)
 				return nil
 			}
-			fmt.Println("Success!")
+			notifyMsg("Success")
 		}
 		return nil
 	},
+}
+
+func init() {
+
+	userV := "username"
+	pwdV := "password"
+	authCmd.PersistentFlags().StringP(userV, "u", "", "Your H3C account")
+	authCmd.PersistentFlags().StringP(pwdV, "p", "", "Your H3C password")
+	viper.BindPFlag(userV, authCmd.PersistentFlags().Lookup(userV))
+	viper.BindPFlag(pwdV, authCmd.PersistentFlags().Lookup(pwdV))
+}
+
+func notifyMsg(msg string) {
+	if viper.GetBool("isNotify") {
+		note := notify.NewNotification(msg)
+		note.Push()
+	}
+	fmt.Println(msg)
 }

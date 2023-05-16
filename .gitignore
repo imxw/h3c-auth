@@ -63,3 +63,4 @@ tags
 
 # Custom
 /_output
+.auth.yml

@@ -5,32 +5,33 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/imxw/h3c-auth/internal/pkg/encutil"
 )
 
-const (
-	serverIP   = "10.0.100.20"
-	serverPort = "8080"
-	baseUrl    = "http://" + serverIP + ":" + serverPort
-	appRootUrl = baseUrl + "/portal"
-	authUrl    = appRootUrl + "/pws?t=li&ifEmailAuth=false"
-)
+type Config struct {
+	Username string
+	Password string
+	IpAddr   string
+	Port     int
+}
 
-var (
-	userName = os.Getenv("USER")
-	password = os.Getenv("PASSWORD")
-)
+func Auth(cfg Config) error {
 
-func Auth() error {
-	fmt.Println(userName, password)
+	username := cfg.Username
+	password := cfg.Password
+	serverIP := cfg.IpAddr
+	serverPort := cfg.Port
+	baseUrl := fmt.Sprintf("http://%s:%d", serverIP, serverPort)
+	appRootUrl := baseUrl + "/portal"
+	authUrl := appRootUrl + "/pws?t=li&ifEmailAuth=false"
+
 	encodeRootUrl := encutil.UrlEncode(appRootUrl)
 	encodePwd := encutil.PwdEncode(password)
 	method := "POST"
 
-	queryParams := fmt.Sprintf("userName=%s&userPwd=%s&serviceType=&language=chinese&usermac=mac&entrance=0&customPageId=3&send_dynamic_pwd_type=0&pwdMode=0&portalProxyIP=%s&portalProxyPort=50200&dcPwdNeedEncrypt=1&assignIpType=0&appRootUrl=%s&userurl=&userip=&basip=&wlannasid=&wlanssid=&loginVerifyCode=&userDynamicPwddd=&manualUrl=&manualUrlEncryptKey=", userName, encodePwd, serverIP, encodeRootUrl)
+	queryParams := fmt.Sprintf("userName=%s&userPwd=%s&serviceType=&language=chinese&usermac=mac&entrance=0&customPageId=3&send_dynamic_pwd_type=0&pwdMode=0&portalProxyIP=%s&portalProxyPort=50200&dcPwdNeedEncrypt=1&assignIpType=0&appRootUrl=%s&userurl=&userip=&basip=&wlannasid=&wlanssid=&loginVerifyCode=&userDynamicPwddd=&manualUrl=&manualUrlEncryptKey=", username, encodePwd, serverIP, encodeRootUrl)
 
 	payload := strings.NewReader(queryParams)
 
@@ -59,7 +60,8 @@ func Auth() error {
 	if err != nil {
 		return err
 	}
-	if body == nil {
+
+	if res.StatusCode != http.StatusOK || body == nil {
 		return errors.New("认证失败")
 	}
 	return nil
