@@ -8,6 +8,8 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -21,7 +23,7 @@ var initCmd = &cobra.Command{
 	Short: "Initialize a config file and an automation script",
 	Long:  "Initialize (h3cauth init) will create a default config file and an automation script",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := createCfgInCwd(cmd, cfgPath)
+		err := genFilesInCwd(cmd)
 		cobra.CheckErr(err)
 
 	},
@@ -37,44 +39,108 @@ netSegment:
   - "10.0.44.0/22"
 `
 
-func createCfgInCwd(cmd *cobra.Command, file string) error {
+const (
+	startBat = `if not "%1"=="wkdxz" mshta vbscript:createobject("wscript.shell").run("""%~f0"" wkdxz",vbhide)(window.close)&&exit
+@echo off
+start "" /B cmd /C %userprofile%\auth.bat > output.log 2>&1
+exit 
+`
+	authBat = `@echo off
 
-	if !fileutil.Exists(file) {
-		f, err := os.Create(cfgPath)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = f.Write(genCfg(cmd, defaultCfg))
+setlocal enabledelayedexpansion
+cd %userprofile%
+:loop
+set "time=%TIME%"
+echo [%date% !time!] Running check command...
+h3cauth.exe check
+
+if %ERRORLEVEL% == 0 (
+  set "time=%TIME%"
+  echo [%date% !time!] Check command completed successfully. Sleeping for 5 seconds...
+  timeout /t 5 >nul
+) else (
+  set "time=%TIME%"
+  echo [%date% !time!] Check command failed with error %ERRORLEVEL%. Running auth command...
+  (h3cauth.exe auth 2>&1) > auth_error.log
+  type auth_error.log
+  set "time=%TIME%"
+  echo [%date% !time!] Auth command completed. Sleeping for 5 seconds...
+  timeout /t 5 >nul
+)
+
+goto loop`
+	startSh = `nohup bash auth.sh > output.log 2>&1 &`
+	authSh  = `#!/bin/bash
+
+while true
+do
+	# 检查网络连接
+	h3cauth check
+	if [ "$?" -eq "0" ]
+	then
+		# 如果网络连接正常，等待5秒钟后再次检查网络连接
+		sleep 5
+	else
+		# 如果网络连接不正常，尝试连接网络
+		echo "$(date '+%Y-%m-%d %H:%M:%S') Connecting to network..."
+		h3cauth auth
+		if [ "$?" -eq "0" ]
+		then
+			# 连接成功，等待5秒钟后再次检查网络连接
+			echo "$(date '+%Y-%m-%d %H:%M:%S') Connected to network"
+			sleep 5
+		else
+			# 连接失败，等待5秒钟后重试
+			echo "$(date '+%Y-%m-%d %H:%M:%S') Failed to connect to network, retrying in 5 seconds..."
+			sleep 5
+		fi
+	fi
+done`
+)
+
+func genFilesInCwd(cmd *cobra.Command) error {
+
+	isForce, err := cmd.PersistentFlags().GetBool("force")
+	if err != nil {
 		return err
-	} else {
-		isForce, err := cmd.PersistentFlags().GetBool("force")
-		cobra.CheckErr(err)
-		if isForce {
-			f, err := os.Create(cfgPath)
-			if err != nil {
-				return err
+	}
+	username, err := cmd.PersistentFlags().GetString("username")
+	if err != nil {
+		return err
+	}
+	password, err := cmd.PersistentFlags().GetString("password")
+	if err != nil {
+		return err
+	}
+
+	templates := map[string]string{".auth.yml": defaultCfg, "start.bat": startBat, "auth.bat": authBat, "start.sh": startSh, "auth.sh": authSh}
+
+	for k, v := range templates {
+		if isForce || !fileutil.Exists(k) {
+			if k == ".auth.yml" {
+				v = fmt.Sprintf(v, username, password)
 			}
-			defer f.Close()
-			_, err = f.Write(genCfg(cmd, defaultCfg))
+
+			switch runtime.GOOS {
+			case "windows":
+				if strings.HasSuffix(k, ".sh") {
+					continue
+				}
+			case "darwin":
+				if strings.HasSuffix(k, ".bat") {
+					continue
+				}
+			default:
+				return fmt.Errorf("the current OS (%s) is not supported", runtime.GOOS)
+			}
+
+		}
+		if err := os.WriteFile(k, []byte(v), 0666); err != nil {
 			return err
 		}
 	}
-
 	return nil
-}
 
-func genCfg(cmd *cobra.Command, template string) []byte {
-
-	var err error
-	var name, pwd string
-
-	name, err = cmd.PersistentFlags().GetString("username")
-	cobra.CheckErr(err)
-	pwd, err = cmd.PersistentFlags().GetString("password")
-	cobra.CheckErr(err)
-
-	return []byte(fmt.Sprintf(defaultCfg, name, pwd))
 }
 
 func init() {
