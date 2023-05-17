@@ -30,6 +30,10 @@ var authCmd = &cobra.Command{
 
 		isIn := false
 
+		if err := checkCfg(); err != nil {
+			return err
+		}
+
 		if viper.IsSet("netSegment") {
 
 			nets := viper.GetStringSlice("netSegment")
@@ -51,7 +55,6 @@ var authCmd = &cobra.Command{
 				notifyMsg("网络正常，无需认证")
 				return nil
 			}
-			checkCfg()
 			cfg := h3cauth.Config{
 				Username: viper.GetString("username"),
 				Password: viper.GetString("password"),
@@ -95,10 +98,11 @@ func notifyMsg(msg string) {
 	fmt.Println(msg)
 }
 
-func checkCfg() {
+func checkCfg() error {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		return nil
 	} else {
-		fmt.Printf("%s is not exist in current directory, please execute \"h3cauth init\" to generate one first!\n", cfgPath)
+		return fmt.Errorf("%s is not exist in current directory, please execute \"h3cauth init\" to generate one first", cfgPath)
 	}
 }
