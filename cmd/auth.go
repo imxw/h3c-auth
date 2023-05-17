@@ -99,10 +99,14 @@ func notifyMsg(msg string) {
 }
 
 func checkCfg() error {
-	if err := viper.ReadInConfig(); err == nil {
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			return fmt.Errorf("%s is not exist in current directory, please execute \"h3cauth init\" to generate one first", cfgPath)
+		} else {
+			return err
+		}
+	} else {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 		return nil
-	} else {
-		return fmt.Errorf("%s is not exist in current directory, please execute \"h3cauth init\" to generate one first", cfgPath)
 	}
 }
