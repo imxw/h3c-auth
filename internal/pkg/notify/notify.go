@@ -6,7 +6,7 @@
 package notify
 
 import (
-	"log"
+	"fmt"
 	"runtime"
 
 	"git.sr.ht/~jackmordaunt/go-toast"
@@ -46,7 +46,7 @@ func (n *Notification) Push() error {
 
 		return note.Push()
 	default:
-		log.Fatalf("暂不支持%s", runtime.GOOS)
+		fmt.Printf("%s暂不支持通知", runtime.GOOS)
 
 	}
 
