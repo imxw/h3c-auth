@@ -15,11 +15,11 @@ import (
 var (
 	cfgFile string
 	rootCmd = &cobra.Command{
-		Use:   "h3cauth",
+		Use:   "h3cli",
 		Short: "A cmd for h3c auth",
-		Long:  `h3cauth is a command-line tool for h3c auth.`,
-		Example: `  First, initialize a config using "h3cauth init -u USERNAME -p PASSWORD".
-  Then connect to your network using "h3cauth auth"`,
+		Long:  `h3cli is a command-line tool for h3c auth.`,
+		Example: `  First, initialize a config using "h3cli init -u USERNAME -p PASSWORD".
+  Then connect to your network using "h3ci auth"`,
 	}
 )
 

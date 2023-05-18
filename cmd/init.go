@@ -21,7 +21,7 @@ const cfgPath = ".auth.yml"
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize a config file and an automation script",
-	Long:  "Initialize (h3cauth init) will create a default config file and an automation script",
+	Long:  "Initialize (h3cli init) will create a default config file and an automation script",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := genFilesInCwd(cmd)
 		cobra.CheckErr(err)
@@ -52,7 +52,7 @@ cd %userprofile%
 :loop
 set "time=%TIME%"
 echo [%date% !time!] Running check command...
-h3cauth.exe check
+h3cli.exe check
 
 if %ERRORLEVEL% == 0 (
   set "time=%TIME%"
@@ -61,7 +61,7 @@ if %ERRORLEVEL% == 0 (
 ) else (
   set "time=%TIME%"
   echo [%date% !time!] Check command failed with error %ERRORLEVEL%. Running auth command...
-  (h3cauth.exe auth 2>&1) > auth_error.log
+  (h3cli.exe auth 2>&1) > auth_error.log
   type auth_error.log
   set "time=%TIME%"
   echo [%date% !time!] Auth command completed. Sleeping for 5 seconds...
@@ -75,7 +75,7 @@ goto loop`
 while true
 do
 	# 检查网络连接
-	h3cauth check
+	h3cli check
 	if [ "$?" -eq "0" ]
 	then
 		# 如果网络连接正常，等待5秒钟后再次检查网络连接
@@ -83,7 +83,7 @@ do
 	else
 		# 如果网络连接不正常，尝试连接网络
 		echo "$(date '+%Y-%m-%d %H:%M:%S') Connecting to network..."
-		h3cauth auth
+		h3cli auth
 		if [ "$?" -eq "0" ]
 		then
 			# 连接成功，等待5秒钟后再次检查网络连接

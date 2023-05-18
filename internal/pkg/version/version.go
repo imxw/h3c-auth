@@ -5,5 +5,5 @@
 
 package version
 
-// Version is the version of h3cauth.
+// Version is the version of h3cli.
 var Version string = "0.1.0"

@@ -19,7 +19,7 @@ ifeq ($(origin GOBIN), undefined)
 	GOBIN := $(GOPATH)/bin
 endif
 
-COMMANDS ?= "h3cauth"
+COMMANDS ?= "h3cli"
 BINS ?= $(foreach cmd,${COMMANDS},$(notdir $(cmd)))
 
 ifeq ($(COMMANDS),)
