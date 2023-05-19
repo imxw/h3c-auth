@@ -1,4 +1,4 @@
-// Copyright 2023 Roy Xu <imxw1991@126.com>. All rights reserved.
+// Copyright 2023 Roy Xu <ixw1991@126.com>. All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file. The original repo for
 // this file is https://github.com/imxw/h3c-auth.
@@ -19,7 +19,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-const app = "h3cli"
+var app = "h3cli"
 
 func Build() error {
 	fmt.Println("Building...")
@@ -29,9 +29,8 @@ func Build() error {
 
 // Runs "go install" for h3cli.  This generates the version info the binary.
 func Install() error {
-	name := "mage"
 	if runtime.GOOS == "windows" {
-		name += ".exe"
+		app += ".exe"
 	}
 
 	gocmd := mg.GoCmd()
@@ -54,7 +53,7 @@ func Install() error {
 	if err := os.Mkdir(bin, 0700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("failed to create %q: %v", bin, err)
 	}
-	path := filepath.Join(bin, name)
+	path := filepath.Join(bin, app)
 
 	// we use go build here because if someone built with go get, then `go
 	// install` turns into a no-op, and `go install -a` fails on people's
