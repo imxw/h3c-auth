@@ -52,5 +52,4 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("auth")
-
 }

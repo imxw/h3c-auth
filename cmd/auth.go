@@ -7,11 +7,11 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"net"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/imxw/h3c-auth/internal/pkg/h3cauth"
 	"github.com/imxw/h3c-auth/internal/pkg/netutil"
@@ -23,7 +23,8 @@ var authCmd = &cobra.Command{
 	Short: "Auth the network connection of h3c",
 	Long:  `Auth the network connection of h3c`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		localIp, err := netutil.GetLocalIP()
+
+		localIps, err := netutil.GetLocalIP()
 		if err != nil {
 			return err
 		}
@@ -37,12 +38,12 @@ var authCmd = &cobra.Command{
 		if viper.IsSet("netSegment") {
 
 			nets := viper.GetStringSlice("netSegment")
-			for _, v := range nets {
-				if !netutil.IsIpInNet(localIp, v) {
-					continue
-				}
+			if isLocalIPInNetSegments(localIps, nets) {
+				// fmt.Println("At least one local IP is in the configured network segments.")
 				isIn = true
-				break
+			} else {
+				// fmt.Println("No local IPs are in the configured network segments.")
+				isIn = false
 			}
 		}
 
@@ -77,8 +78,19 @@ var authCmd = &cobra.Command{
 	},
 }
 
-func init() {
+// 检查本地 IP 是否在配置的网段内
+func isLocalIPInNetSegments(localIPs []net.IP, netSegments []string) bool {
+	for _, ip := range localIPs {
+		for _, segment := range netSegments {
+			if netutil.IsIpInNet(ip, segment) {
+				return true
+			}
+		}
+	}
+	return false
+}
 
+func init() {
 	userV := "username"
 	pwdV := "password"
 	authCmd.PersistentFlags().StringP(userV, "u", "", "Your H3C account")

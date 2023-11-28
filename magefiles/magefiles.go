@@ -19,7 +19,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-var app = "h3cli"
+var app = "h3ctl"
 
 func Build() error {
 	fmt.Println("Building...")
@@ -50,7 +50,7 @@ func Install() error {
 	}
 	// specifically don't mkdirall, if you have an invalid gopath in the first
 	// place, that's not on us to fix.
-	if err := os.Mkdir(bin, 0700); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir(bin, 0o700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("failed to create %q: %v", bin, err)
 	}
 	path := filepath.Join(bin, app)

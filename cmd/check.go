@@ -21,11 +21,13 @@ var checkCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ret := netutil.IsNetOk()
 		if ret {
-			ipAddr, err := netutil.GetLocalIP()
+			ips, err := netutil.GetLocalIP()
 			if err != nil {
 				return err
 			}
-			fmt.Println("Network is available, and your local ip is: ", ipAddr)
+			for _, ip := range ips {
+				fmt.Println("Network is available, and your local ip is: ", ip)
+			}
 			return nil
 		}
 		return errors.New("your network is not available")

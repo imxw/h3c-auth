@@ -8,27 +8,37 @@ package netutil
 import (
 	"net"
 	"net/http"
+	"strings"
+	"time"
 )
 
-func GetLocalIP() (ip net.IP, err error) {
-	addrs, err := net.InterfaceAddrs()
+func GetLocalIP() ([]net.IP, error) {
+	var ips []net.IP
+	interfaces, err := net.Interfaces()
 	if err != nil {
-		return
+		return nil, err
 	}
-	for _, addr := range addrs {
-		ipAddr, ok := addr.(*net.IPNet)
-		if !ok {
+
+	for _, interf := range interfaces {
+		// 忽略以 "utun" 开头的接口
+		if strings.HasPrefix(interf.Name, "utun") {
 			continue
 		}
-		if ipAddr.IP.IsLoopback() {
+
+		addrs, err := interf.Addrs()
+		if err != nil {
 			continue
 		}
-		if !ipAddr.IP.IsGlobalUnicast() {
-			continue
+
+		for _, addr := range addrs {
+			ipAddr, ok := addr.(*net.IPNet)
+			if !ok || ipAddr.IP.IsLoopback() || !ipAddr.IP.IsGlobalUnicast() {
+				continue
+			}
+			ips = append(ips, ipAddr.IP)
 		}
-		return ipAddr.IP, nil
 	}
-	return
+	return ips, nil
 }
 
 func IsIpInNet(ipAddr net.IP, network string) bool {
@@ -47,21 +57,32 @@ func IsIpInNet(ipAddr net.IP, network string) bool {
 }
 func IsNetOk() bool {
 
-	url := "http://connect.rom.miui.com/generate_204"
-	method := "GET"
-
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		panic(err)
+	// 参考： https://imldy.cn/posts/99d42f85/
+	urls := []string{
+		"http://connect.rom.miui.com/generate_204",
+		"http://wifi.vivo.com.cn/generate_204",
+		"http://www.apple.com/library/test/success.html",
+		"http://connectivitycheck.platform.hicloud.com/generate_204",
+		"http://www.google.com/generate_204",
 	}
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		panic(err)
+	for _, url := range urls {
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			continue
+		}
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		res, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode == 204 || res.StatusCode == 200 {
+			return true
+		}
 	}
 
-	defer res.Body.Close()
-
-	return res.StatusCode == 204
+	return false
 }
